@@ -10,14 +10,14 @@ That out of the way, here's what it does:
   * Opens the movie with FFProbe to get video and audio quality information (using FFProbe, duh)
   * Connects to the Plex database to see if the movie already exists in the library:
   	* If so, it compares the video and audio quality information to determine which is better
-   * If not, it performs a quality check on the movie to determine if its good enough to add to the library
+    * If not, it performs a quality check on the movie to determine if its good enough to add to the library
     * Movies that are considered borderline are added to a staging directory for manual processing
     * Movies that do not meet quality standards are deleted.
 
 Quality is completely subjective and a script can't suss out any of that, but it can determine the quality of the encode at the nuts and bolts level. For the most part, downloaded movies fit within only a few quality buckets, and by using BPP, the rule of 0.75 and genre, this scrip can go a long way in weeding out shitty encodes from your library. Is it perfect, hell no, but its a good first step in managing your downloads.
 
 Here's the basis of my file dispositions:
-1. If the file is 4:3 and is older than 1977, delete it. (1977 is arbitrary, but it is also the year of Star Wars)
+1. If the file is 4:3 __and__ is older than 1977, delete it. (1977 is arbitrary, but it is also the year of Star Wars)
 2. If the file doesn't have a BPP greater than 0.04, delete it.
 3. If the files doesn't include enough metadata information to disposition, delete it (e.g. codec, bitrate, framerate, etc.)
 4. If the movie is older than 1977, be more lienient
@@ -29,9 +29,9 @@ Here's the basis of my file dispositions:
 This script will require the parse-torrent-name and fuzzywuzzy python libraries. They both can be installed with pip. It also requires FFProbe.
 
 ### Usage: process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] -f movie_file
-  -d|--dry-run    Disposition file but don't perform any file operations
-  -v|--verbose    Increase logging
-  -r|--replace    Replace file in Plex library if it's deemed better
+* -d|--dry-run    Disposition file but don't perform any file operations
+* -v|--verbose    Increase logging
+* -r|--replace    Replace file in Plex library if it's deemed better
  
 I typically run this either from a find -exec command or from a shell script executed on-completion from from aria2c
  
