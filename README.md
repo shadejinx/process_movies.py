@@ -17,7 +17,7 @@ That out of the way, here's what it does:
 Quality is completely subjective and a script can't suss out any of that, but it can determine the quality of the encode at the nuts and bolts level. For the most part, downloaded movies fit within only a few quality buckets, and by using BPP, the rule of 0.75 and genre, this scrip can go a long way in weeding out shitty encodes from your library. Is it perfect, hell no, but its a good first step in managing your downloads.
 
 Here's the basis of my file dispositions:
-1. If the file is 4:3 __and__ is older than 1977, delete it. (1977 is arbitrary, but it is also the year of Star Wars)
+1. If the file is 4:3 __and__ is newer than 1977, delete it. (1977 is arbitrary, but it is also the year of Star Wars)
 2. If the file doesn't have a BPP greater than 0.04, delete it.
 3. If the files doesn't include enough metadata information to disposition, delete it (e.g. codec, bitrate, framerate, etc.)
 4. If the movie is older than 1977, be more lienient
