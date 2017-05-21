@@ -33,5 +33,4 @@ This script will require the parse-torrent-name and fuzzywuzzy python libraries.
 * -v|--verbose    Increase logging
 * -r|--replace    Replace file in Plex library if it's deemed better
  
-I typically run this either from a find -exec command or from a shell script executed on-completion from from aria2c
  
