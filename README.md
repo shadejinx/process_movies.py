@@ -33,4 +33,8 @@ This script will require the parse-torrent-name and fuzzywuzzy python libraries.
 * -v|--verbose    Increase logging
 * -r|--replace    Replace file in Plex library if it's deemed better
  
- 
+### Known Issues
+* The parse-torrent-name library isn't perfect and has problems with files with 'Web-DL' in the title.
+* Movie metadata is very inconsistent. I've tried to normalize as much as I can with the data sources I have available to me, but I understand my dataset is small. If it doesn't work for your data set, again... I'm not surprised.
+* This script is VERY english-centric.
+
