@@ -26,7 +26,9 @@ Here's the basis of my file dispositions:
 7. Preference is given to newer codecs, english audio or subtitles and 6 channel (or better) audio 
 
 ## Dependencies
-This script will require the parse-torrent-name and fuzzywuzzy python libraries. They both can be installed with pip. It also requires FFProbe.
+* This script will require the parse-torrent-name and fuzzywuzzy python libraries. They both can be installed with pip. 
+* FFProbe will need to be installed. I run this on an Ubuntu installation so it's located in /usr/bin/ffprobe
+* You will also need a TheMovieDB API key. You get that by signing up for an account and visiting your settings page.
 
 ### Usage: process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] -f movie_file
 * -d|--dry-run    Disposition file but don't perform any file operations
