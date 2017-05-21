@@ -23,8 +23,6 @@ log_file = '/var/log/aria2/process_file.log'
 
 tvdb_apikey = TVDB_API_KEY
 
-codeclist = [ 'mpeg2', 'h265', 'h264', 'mpeg4' ]
-
 #######
 
 def getFFProbeInfo( inFile, inStream ):
@@ -734,6 +732,7 @@ for genre in [ 12, 14, 16, 27, 28, 878 ]:
 
 
 ### SEARCH PLEX DATABASE FOR FILE
+codeclist = [ 'mpeg2', 'h265', 'h264', 'mpeg4' ]
 dest_dir = title + ' (' + year + ')'
 duplicate = False
 
