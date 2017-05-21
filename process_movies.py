@@ -35,7 +35,7 @@ def getFFProbeInfo( inFile, inStream ):
 
         res = None
 
-        if os.path.isfile( inFile ) and inStream in ['a','v']:
+        if os.path.isfile( inFile ) and inStream in ['a', 'v', 's']:
                 cmd = [ '/usr/bin/ffprobe' ]
                 arg = '-v quiet -print_format json -select_streams ' + inStream + ': -show_streams'
 
