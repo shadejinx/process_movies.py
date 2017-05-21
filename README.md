@@ -25,9 +25,13 @@ Here's the basis of my file dispositions:
 6. If the movie already exists in the Plex library, the new file must be at least 20% better to consider replacement
 7. Preference is given to newer codecs, english audio or subtitles and 6 channel (or better) audio 
 
+## Dependencies
+This script will require the parse-torrent-name and fuzzywuzzy python libraries. They both can be installed with pip. It also requires FFProbe.
+
 ### Usage: process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] -f movie_file
   -d|--dry-run    Disposition file but don't perform any file operations
   -v|--verbose    Increase logging
   -r|--replace    Replace file in Plex library if it's deemed better
  
+I typically run this either from a find -exec command or from a shell script executed on-completion from from aria2c
  
