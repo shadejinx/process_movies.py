@@ -21,7 +21,7 @@ plex_library_name = 'Movies'
 
 log_file = '/var/log/aria2/process_file.log'
 
-tvdb_apikey = '454a79e71c7123f44c13c60482baa7cc'
+tvdb_apikey = TVDB_API_KEY
 
 codeclist = [ 'mpeg2', 'h265', 'h264', 'mpeg4' ]
 
