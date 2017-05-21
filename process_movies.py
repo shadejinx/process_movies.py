@@ -420,15 +420,10 @@ def getPlexAudioInfo( inMediaID ):
                         elif row_lang:
                                 foreign = True
 
-                        if row_chan >= channels and row_bit >= bitrate:
+                        if ( row_chan >= channels and row_bit >= bitrate ) or not codec:
                                 channels = row_chan
                                 bitrate = row_bit
                                 codec = row_codec
-
-                        if not codec:
-                                codec = row_codec
-                                bitrate = row_bit
-                                channels = row_chan
 
         if english:
                 language = 'english'
