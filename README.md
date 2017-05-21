@@ -30,12 +30,13 @@ Here's the basis of my file dispositions:
 * FFProbe will need to be installed. I run this on an Ubuntu installation so it's located in /usr/bin/ffprobe
 * You will also need a TheMovieDB API key. You get that by signing up for an account and visiting your settings page.
 
-### Usage: process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] -f movie_file
-* -d|--dry-run    Disposition file but don't perform any file operations
-* -v|--verbose    Increase logging
-* -r|--replace    Replace file in Plex library if it's deemed better
+## Usage 
+### process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] -f movie_file
+* -d|--dry-run&nbsp;&nbsp;&nbsp;&nbsp;Disposition file but don't perform any file operations
+* -v|--verbose&nbsp;&nbsp;&nbsp;&nbsp;Increase logging
+* -r|--replace&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Replace file in Plex library if it's deemed better
  
-### Known Issues
+## Known Issues
 * The parse-torrent-name library isn't perfect and has problems with files with 'Web-DL' in the title.
 * Movie metadata is very inconsistent. I've tried to normalize as much as I can with the data sources I have available to me, but I understand my dataset is small. If it doesn't work for your data set, again... I'm not surprised.
 * This script is VERY english-centric.
