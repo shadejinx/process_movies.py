@@ -1,3 +1,5 @@
+import sqlite3
+
 def queryPlexDB( inQuery ):
 ### queryPlexDB
 #       Input : inQuery (string), plexdb (Global string)
