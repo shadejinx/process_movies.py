@@ -21,7 +21,7 @@ plex_library_name = 'Movies'
 
 log_file = '/var/log/aria2/process_file.log'
 
-tvdb_apikey = TVDB_API_KEY
+mvdb_apikey = MVDB_API_KEY
 
 ######
 
@@ -441,8 +441,8 @@ def getPlexAudioInfo( inMediaID ):
         return codec, language, channels, bitrate
 
 
-def getTVDBResult( inTitle, inYear ):
-### getTVDBResult
+def getMVDBResult( inTitle, inYear ):
+### getMVDBResult
 #       Input: Title (string), Year (int)
 #       Output: JSON blob
 #               Errors to None
@@ -453,7 +453,7 @@ def getTVDBResult( inTitle, inYear ):
         url = "https://api.themoviedb.org/3/search/movie"
         isJSON = False
 
-        payload = {'api_key' : tvdb_apikey, 'query' : inTitle, 'year' : inYear }
+        payload = {'api_key' : mvdb_apikey, 'query' : inTitle, 'year' : inYear }
         response = requests.request("GET", url, data=payload)
 
         if response.status_code == requests.codes.ok:
@@ -603,7 +603,7 @@ if replace:
 src_file = os.path.basename(full_path)
 
 
-### GET MEDIAINFO INFORMATION FROM FILE
+### GET FFPROBE INFORMATION FROM FILE
 video = getFFProbeInfo( full_path, 'v' )
 if video:
         codec, bitrate, ratio, pixels, framerate = getVideoInfo( video )
@@ -660,19 +660,19 @@ title = file_info['title'].replace('.',' ').strip(",'!%/ ").title()
 year = str(file_info['year'])
 
 
-### SEARCH TVDB FOR INFORMATION
-log.debug('Checking TVDB for: \'' + title + '\' in ' + year )
-res = getTVDBResult( title, year )
+### SEARCH MVDB FOR INFORMATION
+log.debug('Checking MVDB for: \'' + title + '\' in ' + year )
+res = getMVDBResult( title, year )
 
 if not res:
-        log.warn('No results from TVDB for: \'' + title + '\' in ' + year)
+        log.warn('No results from MVDB for: \'' + title + '\' in ' + year)
         if '-' in title or ':' in title:
                 split_title = title.replace('-', ':').strip().split(':')
                 log.debug('Attempting munge title: \'' + split_title[0] + '\' in ' + year)
-                res = getTVDBResult( split_title[0], year )
+                res = getMVDBResult( split_title[0], year )
 
         if not res:
-                log.error('#### FINISH: No results from TVDB, check ' + src_file + ' for naming errors.')
+                log.error('#### FINISH: No results from MVDB, check ' + src_file + ' for naming errors.')
                 sys.exit(1)
 
 prev_score = None
@@ -685,17 +685,17 @@ for idx in range(len(res)):
                 score = fuzz.token_sort_ratio(title.lower(), res[idx]['title'].lower())
                 if score >= threshold and score > prev_score:
                         prev_score = score
-                        tvdb_title = res[idx]['title'].lower()
-                        tvdb_date = res[idx]['release_date']
-                        tvdb_language = res[idx]['original_language']
-                        tvdb_genres = res[idx]['genre_ids']
+                        mvdb_title = res[idx]['title'].lower()
+                        mvdb_date = res[idx]['release_date']
+                        mvdb_language = res[idx]['original_language']
+                        mvdb_genres = res[idx]['genre_ids']
 
 if not prev_score:
-        log.warn('A definitive match cannot be found in TVDB, munging title and searching again')
+        log.warn('A definitive match cannot be found in mVDB, munging title and searching again')
         if str(year) in res[0]['release_date'] or str(int(year) - 1) in res[0]['release_date'] or str(int(year) + 1) in res[0]['release_date']:
                 if ':' in res[0]['title'] or '-' in res[0]['title']:
-                        split_tvdb = res[0]['title'].replace('-', ':').split(':')
-                        munge_title = split_tvdb[0].lower()
+                        split_mvdb = res[0]['title'].replace('-', ':').split(':')
+                        munge_title = split_mvdb[0].lower()
                         threshold = 90
                 else:
                         title_len = len(title)
@@ -706,27 +706,27 @@ if not prev_score:
                 score = fuzz.token_sort_ratio( title.lower(), munge_title )
                 if score >= threshold:
                         prev_score = score
-                        tvdb_title = res[0]['title'].lower()
-                        tvdb_date = res[0]['release_date']
-                        tvdb_language = res[0]['original_language']
-                        tvdb_genres = res[0]['genre_ids']
+                        mvdb_title = res[0]['title'].lower()
+                        mvdb_date = res[0]['release_date']
+                        mvdb_language = res[0]['original_language']
+                        mvdb_genres = res[0]['genre_ids']
 
 if prev_score:
-        log.debug('TVDB match at ' + str(prev_score) + '%: ' + title + ', ' + year + ' => ' +  tvdb_title.title() + ', ' + tvdb_date )
-        title = tvdb_title.strip(",'!%/").replace(":", " -").title()
+        log.debug('MVDB match at ' + str(prev_score) + '%: ' + title + ', ' + year + ' => ' +  mvdb_title.title() + ', ' + mvdb_date )
+        title = mvdb_title.strip(",'!%/").replace(":", " -").title()
 else:
-        log.error('#### FINISH: TVDB has results but a definitive match was not found, edit filename and try again' )
+        log.error('#### FINISH: MVDB has results but a definitive match was not found, edit filename and try again' )
         sys.exit(1)
 
 
-#TVDB Genres
+#MVDB Genres
 # 12:Adventure, 14:Fantasy, 16:Animation, 27:Horror, 28:Action, 878:Science-Fiction
 
 ### If file is in one of the above genres, it wants for a higher quality file
 high_def = False
 
 for genre in [ 12, 14, 16, 27, 28, 878 ]:
-        if genre in tvdb_genres:
+        if genre in mvdb_genres:
                 high_def = True
                 break
 
