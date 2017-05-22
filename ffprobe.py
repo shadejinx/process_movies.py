@@ -1,3 +1,7 @@
+import json
+import os
+import subprocess
+
 def getFFProbeInfo( inFile, inStream ):
 ### getFFProbeInfo
 #       Input: filename (string), [v, a, s] (string)
