@@ -27,8 +27,8 @@ mvdb_apikey = MVDB_API_KEY
 
 def getFFProbeInfo( inFile, inStream ):
 ### getFFProbeInfo
-#       Input: filename, [v, a]
-#       Output: JSON object
+#       Input: filename (string), [v, a, s] (string)
+#       Output: res (JSON object)
 #               Errors to None
 
         res = None
@@ -55,7 +55,7 @@ def getFFProbeInfo( inFile, inStream ):
 
 def getVideoInfo( inJSON ):
 ### getVideoInfo
-#       Input: JSON object from FFProbe
+#       Input: inJSON (JSON object)
 #       Output: codec (string), birate (int), aspect (float), pixels (int), framerate (float)
 #               Errors to None
 
@@ -108,8 +108,8 @@ def getVideoInfo( inJSON ):
 
 def mungeCodec( inCodec ):
 ### mungeCodec
-#       Input: String representing a codec
-#       Output: String
+#       Input: inCodec (string)
+#       Output: codec (string)
 #               Errors to None
 
         codec = str(inCodec) if isinstance( inCodec, basestring ) else None
@@ -133,7 +133,7 @@ def mungeCodec( inCodec ):
 
 def getAudioInfo( inJSON ):
 ### getAudioInfo
-#       Input: JSON object
+#       Input: inJSON (JSON object)
 #       Output: language (string), channels (int), bitrate (string)
 #               Errors to None
         try:
