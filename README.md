@@ -35,7 +35,7 @@ Here's the basis of my file dispositions:
 * -d|--dry-run&nbsp;&nbsp;&nbsp;&nbsp;Disposition file but don't perform any file operations
 * -v|--verbose&nbsp;&nbsp;&nbsp;&nbsp;Increase logging
 * -r|--replace&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Replace file in Plex library if it's deemed better
-* --mbdb-api-key&nbsp;&nbsp;&nbsp;&nbsp;MVDB API Key
+* --mvdb-api-key&nbsp;&nbsp;&nbsp;&nbsp;MVDB API Key
  
 ## Known Issues
 * The parse-torrent-name library isn't perfect and has problems with files with 'Web-DL' in the title.
