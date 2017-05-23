@@ -537,6 +537,13 @@ if plex_section_id:
 
                 old_codec, old_bitrate, old_pixels, old_fps = libplexdb.getPlexVideoInfo( plexdb, plex_media_id )
 
+                ### If the information isn't in the Plex library, get it from the file
+                ### If the file is on remote storage, this could be slow
+                if ( not old_codec or not old_bitrate or not old_pixels or not old_fps ) and old_file:
+                        old_video = getFFProbeInfo( old_file, 'v' )
+                        if old_video:
+                                old_codec, old_bitrate, old_pixels, old_fps = getVideoInfo( old_audio )
+
                 old_codec = '' if not old_codec else str(mungeCodec(old_codec))
                 old_bitrate = 0 if not old_bitrate else old_bitrate
                 old_pixels = 0 if not old_pixels else old_pixels
@@ -544,10 +551,32 @@ if plex_section_id:
 
                 old_aud_codec, old_lang, old_channels, old_aud_bitrate = libplexdb.getPlexAudioInfo( plexdb, plex_media_id )
 
+                ### If the information isn't in the Plex library, get it from the file
+                ### If the file is on remote storage, this could be slow
+                if ( not old_aud_codec or not old_lang or not old_channels or not old_aud_bitrate) and old_file:
+                        old_audio = getFFProbeInfo( old_file, 'a' )
+                        if old_audio:
+                                old_aud_codec, old_lang, old_channels, old_aud_bitrate = getAudioInfo( old_audio )
+
                 old_aud_codec = '' if not old_aud_codec else old_aud_codec
                 old_lang = 'unknown' if not old_lang else old_lang
                 old_channels = 0 if not old_channels else old_channels
                 old_aud_bitrate = 0 if not old_aud_bitrate else old_aud_bitrate
+
+                #####
+                ### INSERT CODE TO EXTRACT SUBTITLES FROM PLEXDB
+                old_eng_subtitles = None
+                #####
+
+                ### If the information isn't in the Plex library, get it from the file
+                ### If the file is on remote storage, this could be slow
+                if old_eng_subtitles == None and old_file:
+                        old_subtitles = getFFProbeInfo( old_file, 's' )
+                        if not old_subtitles:
+                                old_eng_subtitles = hasEngSubtitles( old_subtitles )
+                        else:
+                                old_eng_subtitles = False
+
 else:
         log.error('#### FINISH: Plex section does not exist: ' + plex_section_id)
         sys.exit(1)
@@ -639,8 +668,8 @@ else:
                 remove = True
 
         #### AUDIO COMPARISON
-        log.debug('Audio Stats, OLD: ' + old_lang + ', ' + old_aud_codec + ', ' + str(old_channels) + ' channels, ' + str(int( old_aud_bitrate / 1000 )) + 'kbps.')
-        log.debug('Audio Stats, NEW: ' + language + ', ' + aud_codec + ', ' + str(channels) + ' channels, ' + str(int( aud_bitrate / 1000 )) + 'kbps.')
+        log.debug('Audio Stats, OLD: ' + old_lang + ', ' + old_aud_codec + ', ' + str(old_channels) + ' channels, ' + str(int( old_aud_bitrate / 1000 )) + 'kbps, Eng Subtitles = ' + str(old_eng_subtitles))
+        log.debug('Audio Stats, NEW: ' + language + ', ' + aud_codec + ', ' + str(channels) + ' channels, ' + str(int( aud_bitrate / 1000 )) + 'kbps, Eng Subtitles = ' + str(eng_subtitles))
         if ( channels >= old_channels or channels >= 6 ) and int(aud_bitrate) > 150000:
                 log.debug('Movie audio track quality meets or exceeds the previous.')
         elif channels == 0 or int(aud_bitrate) == 0:
@@ -650,7 +679,7 @@ else:
                 log.warn('Movie audio track quality does not meet the standard of the previous.')
                 remove = True
 
-        old_audscore = calcAudioScore( old_aud_codec, old_aud_bitrate, old_channels, old_lang, False )
+        old_audscore = calcAudioScore( old_aud_codec, old_aud_bitrate, old_channels, old_lang, old_eng_subtitles )
         audscore = calcAudioScore( aud_codec, aud_bitrate, channels, language, eng_subtitles )
 
         old_totalscore = calcTotalScore( old_vidscore, old_audscore, year, high_def )
