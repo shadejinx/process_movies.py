@@ -185,14 +185,10 @@ log.setLevel(logging.INFO)
 
 ### CONFIGURE ARGUMENT PARSING
 aparse = argparse.ArgumentParser(description='Process movie files into Plex')
-aparse.add_argument('-f', '--file', dest='file', required=True, \
-			help='a file to process')
-aparse.add_argument('-d', '--dry-run', dest='dryrun', action='store_true', \
-			help='process files but do not move them')
-aparse.add_argument('-v', '--verbose', dest='verbose', action='store_true', \
-			help='get more detail')
-aparse.add_argument('-r', '--replace', dest='replace', action='store_true', \
-			help='replace files in your library if better exists')
+aparse.add_argument('-f', '--file', dest='file', required=True, help='a file to process')
+aparse.add_argument('-d', '--dry-run', dest='dryrun', action='store_true', help='process files but do not move them')
+aparse.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='get more detail')
+aparse.add_argument('-r', '--replace', dest='replace', action='store_true', help='replace files in your library if better exists')
 aparse.add_argument('--mvdb-api-key', dest='mvdb_apikey', help='mvdb api key')
 
 args = aparse.parse_args()
@@ -312,7 +308,8 @@ for idx in range(len(res)):
 
 if not prev_score:
         log.warn('A definitive match cannot be found in mVDB, munging title and searching again')
-        if str(year) in res[0]['release_date'] or str(int(year) - 1) in res[0]['release_date'] or str(int(year) + 1) in res[0]['release_date']:
+        if str(year) in res[0]['release_date'] or str(int(year) - 1) in res[0]['release_date'] or str(int(year) + 1) in \
+	res[0]['release_date']:
                 if ':' in res[0]['title'] or '-' in res[0]['title']:
                         split_mvdb = res[0]['title'].replace('-', ':').split(':')
                         munge_title = split_mvdb[0].lower()
@@ -431,16 +428,14 @@ elif codec == 'unknown':
         staging = True
 
 elif duplicate and ( not old_pixels or not old_bitrate ):
-        log.error('File found in the Plex library, but not analyzed yet. Analyze "' \
-		+ title + '" in Plex and rerun this script.')
+        log.error('File found in the Plex library, but not analyzed yet. Analyze "' + title + '" in Plex and rerun this script.')
         error = 1
 
 elif not duplicate:
         log.debug('Found in the Plex library: FALSE')
 
         ### Check video quality
-        log.debug('Video Stats: ' + codec + ', ' + str(int( bitrate / 1000 )) + 'kbps, ' \
-		+ str(int( pixels / 1000 )) + 'k pixels.' )
+        log.debug('Video Stats: ' + codec + ', ' + str(int( bitrate / 1000 )) + 'kbps, ' + str(int( pixels / 1000 )) + 'k pixels.' )
         log.debug('Bits-Per-Pixel (BPP): ' + str(round(bpp, 3)))
 
         log.debug('High-def genre: ' + str(high_def).upper() )
@@ -448,8 +443,7 @@ elif not duplicate:
         vid_score = calcVideoScore( codec, bitrate, pixels, framerate )
 
         ### SCORE AUDIO
-        log.debug('Audio Stats: ' + language + ', ' + str(channels) + ' channels, ' \
-		+ str(int( aud_bitrate / 1000 )) + 'kbps' )
+        log.debug('Audio Stats: ' + language + ', ' + str(channels) + ' channels, ' + str(int( aud_bitrate / 1000 )) + 'kbps' )
 
 
         aud_score = calcAudioScore( aud_codec, aud_bitrate, channels, language, eng_subtitles )
@@ -478,10 +472,10 @@ else:
         old_bpp = old_bitrate / ( old_pixels * old_fps )
 
         #### VIDEO COMPARISON
-        log.debug('Video Stats, OLD: ' + old_codec + ', ' + str(int( old_bitrate / 1000 )) + 'kbps, ' \
-		+ str(int( old_pixels / 1000 )) + 'k pixels, BPP: ' + str(round(old_bpp, 3)) )
+        log.debug('Video Stats, OLD: ' + old_codec + ', ' + str(int( old_bitrate / 1000 )) + 'kbps, ' + str(int( old_pixels / 1000 )) \
+		  + 'k pixels, BPP: ' + str(round(old_bpp, 3)) )
         log.debug('Video Stats, NEW: ' + codec + ', ' + str(int( bitrate / 1000 )) + 'kbps, ' + str(int( pixels / 1000 )) \
-		+ 'k pixels, BPP: ' + str(round(bpp, 3)) )
+		  + 'k pixels, BPP: ' + str(round(bpp, 3)) )
 
         log.debug('Target bitrate for the rule of 0.75 is: ' + str(int( estimated_bitrate / 1000 )) + 'kbps.' )
 
@@ -509,9 +503,9 @@ else:
 
         #### AUDIO COMPARISON
         log.debug('Audio Stats, OLD: ' + old_lang + ', ' + old_aud_codec + ', ' + str(old_channels) + ' channels, ' \
-		+ str(int( old_aud_bitrate / 1000 )) + 'kbps, Eng Subtitles = ' + str(old_eng_subtitles))
+		  + str(int( old_aud_bitrate / 1000 )) + 'kbps, Eng Subtitles = ' + str(old_eng_subtitles))
         log.debug('Audio Stats, NEW: ' + language + ', ' + aud_codec + ', ' + str(channels) + ' channels, ' \
-		+ str(int( aud_bitrate / 1000 )) + 'kbps, Eng Subtitles = ' + str(eng_subtitles))
+		  + str(int( aud_bitrate / 1000 )) + 'kbps, Eng Subtitles = ' + str(eng_subtitles))
 
         if ( channels >= old_channels or channels >= 6 ) and int(aud_bitrate) > 150000:
                 log.debug('Movie audio track quality meets or exceeds the previous.')
