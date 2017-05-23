@@ -7,104 +7,25 @@ import requests
 import json
 import os
 import sys
-import subprocess
 import logging
 import shutil
+import libffprobe
 import libplexdb
 from fuzzywuzzy import fuzz
 
 library_dir = '/mnt/movies'
-staging_dir = '/mnt/.local/media/video/staging'
+staging_dir = '/mnt/staging'
 
 plexdb = '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db'
 plex_library_name = 'Movies'
 
 log_file = '/var/log/aria2/process_file.log'
 
-mvdb_apikey = MVDB_API_KEY
+mvdb_apikey = 'MVDB_API_KEY'
+
+ffprobe_path = '/usr/bin/ffprobe'
 
 ######
-
-def getFFProbeInfo( inFile, inStream ):
-### getFFProbeInfo
-#       Input: filename (string), [v, a, s] (string)
-#       Output: res (JSON object)
-#               Errors to None
-
-        res = None
-
-        if os.path.isfile( inFile ) and inStream in ['a', 'v', 's']:
-                cmd = [ '/usr/bin/ffprobe' ]
-                arg = '-v quiet -print_format json -select_streams ' + inStream + ': -show_streams'
-
-                cmd = cmd + arg.split()
-                cmd.append(inFile)
-
-                try:
-                        output = subprocess.check_output( cmd )
-                except Exception, e:
-                        output = None
-
-                if output:
-                        try:
-                                res = json.loads(output)
-                        except ValueError:
-                                res = None
-        return res
-
-
-def getVideoInfo( inJSON ):
-### getVideoInfo
-#       Input: inJSON (JSON object)
-#       Output: codec (string), birate (int), aspect (float), pixels (int), framerate (float)
-#               Errors to None
-
-        try:
-                isJSON = json.dumps(inJSON)
-        except ValueError:
-                isJSON = None
-
-        if isJSON and inJSON['streams']:
-                stream = inJSON['streams'][0]
-
-                codec = stream.get('codec_name').lower()
-                aspect = stream.get('display_aspect_ratio')
-                width = stream.get('width')
-                height = stream.get('height')
-                bitrate = stream.get('bit_rate')
-                framerate = stream.get('avg_frame_rate')
-
-                codec = mungeCodec(codec) if codec else None
-
-                if not bitrate and stream.get('tags'):
-                        bitrate = stream['tags'].get('BPS')
-
-                if ':' in aspect:
-                        ratio = aspect.split(':')
-                        aspect = round((int(ratio[0]) / int(ratio[1])),3)
-
-                if not aspect:
-                        aspect = round((int(width) / int(height)), 3)
-
-                if '/0' in framerate:
-                        framerate = stream.get('r_frame_rate')
-
-                if '/' in framerate and '/0' not in framerate:
-                        rate = framerate.split('/')
-                        framerate = round((int(rate[0]) / int(rate[1])),3)
-                else:
-                        framerate = 0
-
-                pixels = int(width) * int(height) if width and height else 0
-
-                codec = str(codec) if codec else None
-                bitrate = int(bitrate) if bitrate else None
-                aspect = float(aspect) if aspect else None
-                pixels = int(pixels) if pixels else None
-                framerate = float(framerate) if framerate else None
-
-                return codec, bitrate, aspect, pixels, framerate
-
 
 def mungeCodec( inCodec ):
 ### mungeCodec
@@ -129,103 +50,6 @@ def mungeCodec( inCodec ):
         codec = str(codec) if codec else None
 
         return codec
-
-
-def getAudioInfo( inJSON ):
-### getAudioInfo
-#       Input: inJSON (JSON object)
-#       Output: language (string), channels (int), bitrate (string)
-#               Errors to None
-        try:
-                isJSON = json.dumps(inJSON)
-        except ValueError:
-                isJSON = None
-
-        codec = None
-        bitrate = None
-        channels = None
-        language = None
-
-        if isJSON and inJSON['streams']:
-                stream = inJSON['streams']
-                en_bit = 0
-                en_chan = 0
-                en_codec = None
-                english = False
-                foreign = False
-
-                for idx in range(len(stream)):
-                        idx_codec = stream[idx].get('codec_name')
-                        idx_bit = stream[idx].get('bit_rate')
-                        idx_chan = stream[idx].get('channels')
-                        idx_lang = None
-
-                        if stream[idx].get('tags'):
-                                idx_lang = stream[idx]['tags'].get('language')
-                                if idx_lang and idx_lang.lower() in [ 'en', 'eng', 'english' ]:
-                                        english = True
-                                        if int(idx_chan) >= int(en_chan):
-                                                en_chan = idx_chan
-                                                en_bit = idx_bit
-                                                en_codec = idx_codec
-                                elif idx_lang and idx_lang != 'und':
-                                        foreign = True
-
-                        if not idx_bit and stream[idx].get('tags'):
-                                idx_bit = stream[idx]['tags'].get('BPS')
-
-                        if idx_chan and idx_bit and int(idx_chan) >= channels and int(idx_bit) >= bitrate:
-                                channels = idx_chan
-                                bitrate = idx_bit
-                                codec = idx_codec
-
-                        if not codec:
-                                codec = idx_codec
-                                bitrate = idx_bit
-                                channels = idx_chan
-
-                if english:
-                        language = 'english'
-                        channels = en_chan
-                        bitrate = en_bit
-                        codec = en_codec
-                elif foreign:
-                        language = 'foreign'
-                else:
-                        language = 'unknown'
-
-        codec = str(codec) if codec else None
-        bitrate = int(bitrate) if bitrate else None
-        channels = int(channels) if channels else None
-        language = str(language) if language else None
-
-        return codec, language, channels, bitrate
-
-
-def hasEngSubtitles( inJSON ):
-### getSubtitleInfo
-#       Input : inJSON (json)
-#       Output: has_eng_subtitle (BOOL)
-#               Errors to False
-
-        try:
-                isJSON = json.dumps(inJSON)
-        except ValueError:
-                isJSON = None
-
-        has_eng_subtitle = False
-
-        if isJSON and inJSON['streams']:
-                stream = inJSON['streams']
-
-                for idx in range(len(stream)):
-                        idx_lang = stream[idx].get('language')
-
-                        if idx_lang.lower() in [ 'en', 'eng', 'english' ]:
-                                has_eng_subtitle = True
-                                break
-
-        return has_eng_subtitle
 
 
 def getMVDBResult( inTitle, inYear ):
@@ -365,12 +189,17 @@ aparse.add_argument('-f', '--file', dest='file', required=True, help='a file to 
 aparse.add_argument('-d', '--dry-run', dest='dryrun', action='store_true', help='process files but do not move them')
 aparse.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='get more detail')
 aparse.add_argument('-r', '--replace', dest='replace', action='store_true', help='replace files in your library if better exists')
+aparse.add_argument('--mvdb-api-key', dest='mvdb_apikey', help='mvdb api key')
+
 args = aparse.parse_args()
 
 full_path = os.path.abspath(args.file)
 verbose = args.verbose
 replace = args.replace
 dryrun = args.dryrun
+
+if args.mvdb_apikey:
+	mvdb_apikey = args.mvdb_apikey
 
 if verbose:
         log.setLevel(logging.DEBUG)
@@ -391,9 +220,9 @@ src_file = os.path.basename(full_path)
 
 
 ### GET FFPROBE INFORMATION FROM FILE
-video = getFFProbeInfo( full_path, 'v' )
+video = libffprobe.getFFProbeInfo( ffprobe_path, full_path, 'v' )
 if video:
-        codec, bitrate, ratio, pixels, framerate = getVideoInfo( video )
+        codec, bitrate, ratio, pixels, framerate = libffprobe.getVideoInfo( video )
 else:
         log.error('#### FINISH: Error reading: ' + full_path)
         sys.exit(1)
@@ -404,9 +233,9 @@ ratio = 0 if not ratio else ratio
 pixels = 0 if not pixels else pixels
 framerate = 0 if not framerate else framerate
 
-audio = getFFProbeInfo( full_path, 'a' )
+audio = libffprobe.getFFProbeInfo( ffprobe_path, full_path, 'a' )
 if audio:
-        aud_codec, language, channels, aud_bitrate = getAudioInfo( audio )
+        aud_codec, language, channels, aud_bitrate = libffprobe.getAudioInfo( audio )
 else:
         log.error('#### FINISH: Error reading: ' + full_path)
         sys.exit(1)
@@ -416,10 +245,10 @@ language = '' if not language else language
 channels = 0 if not channels else channels
 aud_bitrate = 0 if not aud_bitrate else aud_bitrate
 
-subtitles = getFFProbeInfo( full_path, 's' )
+subtitles = libffprobe.getFFProbeInfo( ffprobe_path, full_path, 's' )
 
 if subtitles:
-        eng_subtitles = hasEngSubtitles( subtitles )
+        eng_subtitles = libffprobe.hasEngSubtitles( subtitles )
 else:
         eng_subtitles = False
 
@@ -540,9 +369,9 @@ if plex_section_id:
                 ### If the information isn't in the Plex library, get it from the file
                 ### If the file is on remote storage, this could be slow
                 if ( not old_codec or not old_bitrate or not old_pixels or not old_fps ) and old_file:
-                        old_video = getFFProbeInfo( old_file, 'v' )
+                        old_video = libffprobe.getFFProbeInfo( ffprobe_path, old_file, 'v' )
                         if old_video:
-                                old_codec, old_bitrate, old_pixels, old_fps = getVideoInfo( old_audio )
+                                old_codec, old_bitrate, old_pixels, old_fps = libffprobe.getVideoInfo( old_audio )
 
                 old_codec = '' if not old_codec else str(mungeCodec(old_codec))
                 old_bitrate = 0 if not old_bitrate else old_bitrate
@@ -554,9 +383,9 @@ if plex_section_id:
                 ### If the information isn't in the Plex library, get it from the file
                 ### If the file is on remote storage, this could be slow
                 if ( not old_aud_codec or not old_lang or not old_channels or not old_aud_bitrate) and old_file:
-                        old_audio = getFFProbeInfo( old_file, 'a' )
+                        old_audio = libffprobe.getFFProbeInfo( ffprobe_path, old_file, 'a' )
                         if old_audio:
-                                old_aud_codec, old_lang, old_channels, old_aud_bitrate = getAudioInfo( old_audio )
+                                old_aud_codec, old_lang, old_channels, old_aud_bitrate = libffprobe.getAudioInfo( old_audio )
 
                 old_aud_codec = '' if not old_aud_codec else old_aud_codec
                 old_lang = 'unknown' if not old_lang else old_lang
@@ -571,9 +400,9 @@ if plex_section_id:
                 ### If the information isn't in the Plex library, get it from the file
                 ### If the file is on remote storage, this could be slow
                 if old_eng_subtitles == None and old_file:
-                        old_subtitles = getFFProbeInfo( old_file, 's' )
+                        old_subtitles = libffprobe.getFFProbeInfo( ffprobe_path, old_file, 's' )
                         if not old_subtitles:
-                                old_eng_subtitles = hasEngSubtitles( old_subtitles )
+                                old_eng_subtitles = libffprobe.hasEngSubtitles( old_subtitles )
                         else:
                                 old_eng_subtitles = False
 
