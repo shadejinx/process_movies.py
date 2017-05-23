@@ -31,10 +31,11 @@ Here's the basis of my file dispositions:
 * You will also need a TheMovieDB API key. You get that by signing up for an account and visiting your settings page.
 
 ## Usage 
-### process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] -f movie_file
+### process_movies.py [-d|--dry-run] [-v|--verbose] [-r|--replace] [--mvdb-api-key] -f movie_file
 * -d|--dry-run&nbsp;&nbsp;&nbsp;&nbsp;Disposition file but don't perform any file operations
 * -v|--verbose&nbsp;&nbsp;&nbsp;&nbsp;Increase logging
 * -r|--replace&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Replace file in Plex library if it's deemed better
+* --mbdb-api-key&nbsp;&nbsp;&nbsp;&nbsp;MVDB API Key
  
 ## Known Issues
 * The parse-torrent-name library isn't perfect and has problems with files with 'Web-DL' in the title.
