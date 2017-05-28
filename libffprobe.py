@@ -33,6 +33,41 @@ def getFFProbeInfo( inFFProbe, inFile, inStream ):
 
         return res
 
+def calcBitRate( inFFProbe, inFile ):
+### calcBitRate
+#       Input : inFFProbe (string), inFile (string)
+#       Output: bitrate (int)
+#               Errors to None
+
+        ffprobe_path = os.path.abspath( inFFProbe ) if inFFProbe else None
+
+        bitrate = None
+        filesize = 0
+        duration = 0
+
+        if os.path.isfile( inFile ) and ffprobe_path:
+                cmd = [ ffprobe_path ]
+                arg = '-v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1'
+
+                cmd = cmd + arg.split()
+                cmd.append(inFile)
+
+                try:
+                        output = subprocess.check_output( cmd )
+                except Exception, e:
+                        output = 0
+
+                duration = float(output) if output else 0
+
+                filesize = os.path.getsize(inFile)
+
+        if filesize and duration:
+                bitrate = ( filesize * 8 ) / duration
+                
+        bitrate = int(bitrate) if bitrate else None
+
+        return bitrate
+
 
 def getVideoInfo( inJSON ):
 ### getVideoInfo
