@@ -229,6 +229,10 @@ else:
 
 codec = '' if not codec else codec
 bitrate = 0 if not bitrate else bitrate
+if not bitrate:
+        log.warn('Bitrate not found in metadata, calculating average bitrate.')
+        bitrate = libffprobe.calcBitRate( ffprobe_path, full_path )
+
 ratio = 0 if not ratio else ratio
 pixels = 0 if not pixels else pixels
 framerate = 0 if not framerate else framerate
