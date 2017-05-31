@@ -80,7 +80,7 @@ def getVideoInfo( inJSON ):
         except ValueError:
                 isJSON = None
 
-        if isJSON and inJSON['streams']:
+        if isJSON and inJSON and inJSON['streams']:
                 stream = inJSON['streams'][0]
 
                 codec = stream.get('codec_name').lower()
@@ -135,7 +135,7 @@ def getAudioInfo( inJSON ):
         channels = None
         language = None
 
-        if isJSON and inJSON['streams']:
+        if isJSON and inJSON and inJSON['streams']:
                 stream = inJSON['streams']
                 en_bit = 0
                 en_chan = 0
@@ -204,7 +204,7 @@ def hasEngSubtitles( inJSON ):
 
         has_eng_subtitle = False
 
-        if isJSON and inJSON['streams']:
+        if isJSON and inJSON and inJSON['streams']:
                 stream = inJSON['streams']
 
                 for idx in range(len(stream)):
