@@ -210,7 +210,7 @@ def hasEngSubtitles( inJSON ):
                 for idx in range(len(stream)):
                         idx_lang = stream[idx].get('language')
 
-                        if idx_lang.lower() in [ 'en', 'eng', 'english' ]:
+                        if idx_lang and idx_lang.lower() in [ 'en', 'eng', 'english' ]:
                                 has_eng_subtitle = True
                                 break
 
