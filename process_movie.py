@@ -70,13 +70,13 @@ def getMVDBResult( inTitle, inYear ):
         if response.status_code == requests.codes.ok:
                 res_json = response.json()
 
-        try:
-                json.dumps(res_json)
-                isJSON = True
-        except ValueError:
-                isJSON = False
+        	try:
+                	json.dumps(res_json)
+                	isJSON = True
+        	except ValueError:
+                	isJSON = False
 
-        if isJSON:
+        if isJSON and res_json and res_json['results']:
                 return( res_json['results'] )
         else:
                 return( None )
@@ -100,11 +100,11 @@ def calcVideoScore( inCodec, inBitrate, inPixels, inFramerate ):
         else:
                 bpp = 0
 
-        for i in [ .05, .08, 0.1, .2, 1 ]:
+        for i in [ .05, .08, 0.1, 0.2, 1 ]:
                 if bpp > i:
                         continue
                 else:
-                        score = [ .05, .08, 0.1, .2, 1 ].index(i)
+                        score = [ .05, .08, 0.1, 0.2, 1 ].index(i)
                         break
 
         score += 1 if codec == 'h265' else 0
